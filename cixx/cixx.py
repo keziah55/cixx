@@ -6,10 +6,8 @@ Created on Mon Feb 15 21:08:25 2021
 @author: keziah
 """
 
-import sys
 import os
 import subprocess
-import tempfile
 from PyQt5.QtWidgets import (QMainWindow, QPlainTextEdit, QAction,  
                              QDockWidget, QDesktopWidget, QFileDialog)
 from PyQt5.QtGui import QFontDatabase, QIcon
@@ -17,8 +15,6 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSlot as Slot
 
 
-# TODO make file-like object to redirect stdout and stderr to, that will write
-# text to the output QPlainTextEdit. And finish run()
 # TODO syntax highlighter (make QPlainTextEdit subclass for input text?)
 # TODO preferences dialog for default save/open location, default includes
 # TODO set text cursor to right place
@@ -28,8 +24,10 @@ class Cixx(QMainWindow):
     def __init__(self):
         super().__init__()
         
-        self.stdout = sys.stdout
-        self.stderr = sys.stderr
+        self.language = 'c++'
+        self.langParams = {
+            'c++':{'ext':'cxx',
+                   'defaultIncludes':["iostream"]}}
         
         fixedFont = QFontDatabase.systemFont(QFontDatabase.FixedFont)
         
@@ -39,8 +37,20 @@ class Cixx(QMainWindow):
         self.output.setReadOnly(True)
         self.output.setFont(fixedFont)
         
-        self.defaultIncludes = ["iostream"]
-        self.initTextEdit()
+        user = os.path.expanduser('~')
+        path = os.path.join(user, '.config', 'cixx')
+        os.makedirs(path, exist_ok=True)
+        ext = self.langParams[self.language]['ext']
+        self.file = os.path.join(path, f"current_contents.{ext}")
+        if not os.path.exists(self.file):
+            text = self.initTextEdit()
+            with open(self.file, 'w') as fileobj:
+                fileobj.write(text)
+                
+        with open(self.file) as fileobj:
+            text = fileobj.read()
+            
+        self.textEdit.setPlainText(text)
         
         self.createDockWidget(self.output, Qt.BottomDockWidgetArea, 
                               title="Output")
@@ -52,7 +62,7 @@ class Cixx(QMainWindow):
         self.createActions()
         self.createToolBar()
         
-        self.setWindowTitle("Cixx - C++ console")
+        self.setWindowTitle("Cixx")
         self.resize(700,600)
         self.centre()
         
@@ -65,14 +75,15 @@ class Cixx(QMainWindow):
         
         
     def initTextEdit(self):
-        include = [f"#include <{lib}>" for lib in self.defaultIncludes]
+        defaultIncludes = self.langParams[self.language]['defaultIncludes']
+        include = [f"#include <{lib}>" for lib in defaultIncludes]
         s = '\n'.join(include)
         s += """
 int main()
 {
     
 }"""
-        self.textEdit.setPlainText(s)
+        return s
       
     @Slot()
     def save(self):
@@ -94,12 +105,20 @@ int main()
     
     @Slot()
     def run(self):
-        pass
-        # with tempfile.NamedTemporaryFile() as fileobj:
-        #     fileobj.write(self.textEdit.plainText())
-        #     subprocess.run(["g++", fileobj.name()])
-        #     subprocess.run(["./a.out"])
-            
+        text = self.textEdit.toPlainText()
+        with open(self.file, 'w') as fileobj:
+            fileobj.write(text)
+        p = subprocess.run(["g++", self.file], stdout=subprocess.PIPE, 
+                           stderr=subprocess.STDOUT)
+        if p.returncode == 0:
+            self.statusBar().showMessage("Successfully compiled!")
+            p = subprocess.run(["./a.out"], stdout=subprocess.PIPE, 
+                           stderr=subprocess.STDOUT)
+            output = p.stdout.decode()
+        else:
+            self.statusBar().showMessage("Errors")
+            output = p.stdout.decode().replace(self.file, 'input')
+        self.output.setPlainText(output)
     
     @Slot()
     def clearOutput(self):
