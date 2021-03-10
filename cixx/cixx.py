@@ -11,8 +11,7 @@ import subprocess
 from PyQt5.QtWidgets import (QMainWindow, QPlainTextEdit, QAction,  
                              QDockWidget, QDesktopWidget, QFileDialog)
 from PyQt5.QtGui import QFontDatabase, QIcon
-from PyQt5.QtCore import Qt
-from PyQt5.QtCore import pyqtSlot as Slot
+from PyQt5.QtCore import Qt, pyqtSlot as Slot
 
 
 # TODO syntax highlighter (make QPlainTextEdit subclass for input text?)
