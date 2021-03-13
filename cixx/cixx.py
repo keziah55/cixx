@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import (QMainWindow, QPlainTextEdit, QAction,
                              QDockWidget, QDesktopWidget, QFileDialog)
 from PyQt5.QtGui import QFontDatabase, QIcon
 from PyQt5.QtCore import Qt, pyqtSlot as Slot
+from .codeeditor import CodeEditor
 
 
 # TODO syntax highlighter (make QPlainTextEdit subclass for input text?)
@@ -30,8 +31,8 @@ class Cixx(QMainWindow):
         
         fixedFont = QFontDatabase.systemFont(QFontDatabase.FixedFont)
         
-        self.textEdit = QPlainTextEdit()
-        self.textEdit.setFont(fixedFont)
+        self.textEdit = CodeEditor()
+        
         self.output = QPlainTextEdit()
         self.output.setReadOnly(True)
         self.output.setFont(fixedFont)
@@ -89,18 +90,19 @@ int main()
         home = os.path.expanduser('~')
         fileName, _ = QFileDialog.getSaveFileName(self, "Save file", home,
                                                   "C++ files (*cpp *cxx *h)")
-        with open(fileName, 'w') as fileobj:
-            fileobj.write(self.textEdit.plainText())
+        if fileName:
+            with open(fileName, 'w') as fileobj:
+                fileobj.write(self.textEdit.plainText())
         
-    
     @Slot()
     def open(self):
         home = os.path.expanduser('~')
         fileName, _ = QFileDialog.getOpenFileName(self, "Open file", home,
                                                   "C++ files (*cpp *cxx *h)")
-        with open(fileName) as fileobj:
-            text = fileobj.read()
-        self.textEdit.setPlainText(text)
+        if fileName:
+            with open(fileName) as fileobj:
+                text = fileobj.read()
+            self.textEdit.setPlainText(text)
     
     @Slot()
     def run(self):
@@ -113,6 +115,8 @@ int main()
             self.statusBar().showMessage("Successfully compiled!")
             p = subprocess.run(["./a.out"], stdout=subprocess.PIPE, 
                            stderr=subprocess.STDOUT)
+            if p.returncode == 0:
+                self.statusBar().showMessage("Successfully compiled and run!")
             output = p.stdout.decode()
         else:
             self.statusBar().showMessage("Errors")
