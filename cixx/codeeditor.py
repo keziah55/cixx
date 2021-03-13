@@ -8,6 +8,8 @@ from PyQt5.QtWidgets import QPlainTextEdit
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import pyqtSlot as Slot
 from .linenumberarea import LineNumberArea
+from .syntaxhighlighter import CxxHighlighter
+
 
 class CodeEditor(QPlainTextEdit):
     
@@ -25,6 +27,12 @@ class CodeEditor(QPlainTextEdit):
         
         self.updateLineNumAreaWidth(0)
         
+        self.highlighter = CxxHighlighter(self.document())
+        
+        
+    @property
+    def text(self):
+        return self.toPlainText()
         
     @Slot(int)
     def updateLineNumAreaWidth(self, count):

@@ -91,7 +91,7 @@ int main()
                                                   "C++ files (*cpp *cxx *h)")
         if fileName:
             with open(fileName, 'w') as fileobj:
-                fileobj.write(self.textEdit.plainText())
+                fileobj.write(self.textEdit.text.strip()+'\n')
         
     @Slot()
     def open(self):
@@ -105,9 +105,10 @@ int main()
     
     @Slot()
     def run(self):
-        text = self.textEdit.toPlainText()
+        text = self.textEdit.text.strip()+'\n'
+        self.textEdit.setPlainText(text)
         with open(self.file, 'w') as fileobj:
-            fileobj.write(text)
+            fileobj.write(self.textEdit.text)
         p = subprocess.run(["g++", self.file], stdout=subprocess.PIPE, 
                            stderr=subprocess.STDOUT)
         if p.returncode == 0:
@@ -148,8 +149,8 @@ int main()
                                statusTip="Open file", toolTip="Open file", 
                                triggered=self.open)
         
-        # self.exitAct = QAction("&Exit", self, shortcut="Ctrl+Q", 
-        #                        statusTip="Exit", triggered=self.close)
+        self.exitAct = QAction("&Exit", self, shortcut="Ctrl+Q", 
+                                statusTip="Exit", triggered=self.close)
         
         self.runIcon = QIcon().fromTheme("media-playback-start")
         self.runAct = QAction(self.runIcon, "&Run", self, shortcut="F5", 
