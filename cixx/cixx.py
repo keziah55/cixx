@@ -10,7 +10,7 @@ import os
 import subprocess
 from PyQt5.QtWidgets import (QMainWindow, QPlainTextEdit, QAction,  
                              QDockWidget, QDesktopWidget, QFileDialog)
-from PyQt5.QtGui import QFontDatabase, QIcon
+from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtCore import Qt, pyqtSlot as Slot
 from .codeeditor import CodeEditor
 
@@ -29,12 +29,11 @@ class Cixx(QMainWindow):
             'c++':{'ext':'cxx',
                    'defaultIncludes':["iostream"]}}
         
-        fixedFont = QFontDatabase.systemFont(QFontDatabase.FixedFont)
-        
         self.textEdit = CodeEditor()
         
         self.output = QPlainTextEdit()
         self.output.setReadOnly(True)
+        fixedFont = QFont("Monospace")
         self.output.setFont(fixedFont)
         
         user = os.path.expanduser('~')

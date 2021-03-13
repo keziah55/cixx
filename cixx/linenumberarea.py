@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Mar 10 20:48:40 2021
-
-@author: keziah
+Widget to draw line numbers in CodeEditor.
 """
 
-from PyQt5.QtWidgets import (QWidget, QPlainTextEdit, QAction,  
-                             QDockWidget, QDesktopWidget, QFileDialog)
-from PyQt5.QtGui import QFontDatabase, QIcon, QPainter, QTextBlock, QFontMetrics, QColor
+from PyQt5.QtWidgets import QWidget
+from PyQt5.QtGui import QPainter, QColor
 from PyQt5.QtCore import Qt, QSize, QRect, pyqtSlot as Slot
 
 # https://doc.qt.io/qt-5/qtwidgets-widgets-codeeditor-example.html
